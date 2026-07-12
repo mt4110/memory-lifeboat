@@ -42,17 +42,33 @@ pub fn write_run_log(store: &Store, manifest: &SourceManifest) -> Result<PathBuf
 }
 
 fn append_event(store: &Store, manifest: &SourceManifest) -> Result<()> {
+    write_event(
+        store,
+        &format!(
+            "time={} status=completed source={:?} observed_items={} coverage={:?} manifest={}",
+            manifest.completed_at,
+            manifest.source,
+            manifest.observed_items,
+            manifest.coverage,
+            manifest.id,
+        ),
+    )
+}
+
+pub fn write_status_event(store: &Store, action: &str) -> Result<()> {
+    write_event(
+        store,
+        &format!(
+            "time={} status=completed action={action}",
+            time::OffsetDateTime::now_utc(),
+        ),
+    )
+}
+
+fn write_event(store: &Store, line: &str) -> Result<()> {
     let path = store.audit_dir().join("events.log");
     let mut file = OpenOptions::new().create(true).append(true).open(path)?;
-    writeln!(
-        file,
-        "time={} status=completed source={:?} observed_items={} coverage={:?} manifest={}",
-        manifest.completed_at,
-        manifest.source,
-        manifest.observed_items,
-        manifest.coverage,
-        manifest.id
-    )?;
+    writeln!(file, "{line}")?;
     file.sync_data()?;
     Ok(())
 }

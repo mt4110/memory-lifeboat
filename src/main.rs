@@ -63,6 +63,7 @@ fn main() -> Result<()> {
 fn doctor(store: &Store) -> Result<()> {
     store.ensure_layout()?;
     crypto::load_or_create_key()?;
+    report::write_status_event(store, "doctor")?;
     println!("store: {}", store.root().display());
     println!("keychain: ok");
     println!("network: not used by this tool");

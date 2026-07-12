@@ -1,0 +1,7 @@
+/.codex
+/target
+/.DS_Store
+*.swp
+store/
+verification-store/
+*.tmp

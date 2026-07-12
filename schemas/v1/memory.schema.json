@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memory-lifeboat.local/schemas/v1/memory.schema.json",
+  "title": "Memory Lifeboat Memory Record",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "kind",
+    "statement",
+    "instruction_class",
+    "status",
+    "source_manifest_id",
+    "evidence_sha256",
+    "captured_at"
+  ],
+  "properties": {
+    "schema": { "const": "memory-lifeboat/memory/v1" },
+    "id": { "type": "string", "pattern": "^mem_" },
+    "kind": {
+      "enum": [
+        "identity",
+        "preference",
+        "constraint",
+        "workflow",
+        "project_fact",
+        "architecture_decision",
+        "rejected_alternative",
+        "open_task",
+        "reference",
+        "browser_asset",
+        "conversation_archive"
+      ]
+    },
+    "statement": { "type": "string", "minLength": 1 },
+    "instruction_class": { "enum": ["observation", "directive"] },
+    "status": { "enum": ["candidate", "active"] },
+    "source_manifest_id": { "type": "string", "pattern": "^manifest_" },
+    "evidence_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "captured_at": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}

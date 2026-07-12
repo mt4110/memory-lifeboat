@@ -22,7 +22,9 @@ cargo run -- import urls ~/Downloads/urls.txt
 cargo run -- report
 ```
 
-Every import refreshes `audit/latest-report.md`. Review it first: it records which source kinds were observed and the number of items found.
+Every import refreshes `audit/latest-report.md` and writes a per-run Markdown log to `audit/runs/`. Run logs record timing, source type, item count, coverage, and safety checks, but never source paths or imported content.
+
+To follow new events in another Warp or Terminal tab, run `./scripts/watch-audit.sh`. `Ctrl-C` stops only the watcher, not any rescued data.
 
 ## What this first release will not do
 

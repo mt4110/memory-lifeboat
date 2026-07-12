@@ -22,6 +22,14 @@ cargo run -- import bookmarks ~/Downloads/AtlasBookmarks.html
 cargo run -- report
 ```
 
+別のWarpまたはTerminalタブで、実行状況を追いかけられます。
+
+```bash
+./scripts/watch-audit.sh
+# テスト用など、別の保存先を使う場合
+./scripts/watch-audit.sh ./store
+```
+
 By default, the store lives at:
 
 ```text
@@ -32,7 +40,7 @@ Use `--store ./store` for local testing.
 
 ## 保管場所と設計
 
-標準の保管場所は `~/Library/Application Support/Memory Lifeboat/` です。元ファイルと候補レコードはmacOSキーチェーンの鍵で暗号化します。マニフェストと監査レポートには、どの種類のデータを何件観測したかだけを残します。
+標準の保管場所は `~/Library/Application Support/Memory Lifeboat/` です。元ファイルと候補レコードはmacOSキーチェーンの鍵で暗号化します。マニフェストと監査レポートには、どの種類のデータを何件観測したかだけを残します。各取り込みの実行ログは `audit/runs/` にMarkdownで蓄積され、Finderや任意のエディタで読めます。`audit/events.log` は追記専用の可視ログで、`tail -f` 監視に使えます。
 
 AIサービスの記憶はキャッシュとして扱い、利用者が管理する暗号化ストアを正本にします。将来のアダプタは、承認済みデータだけを `AGENTS.md`、フック、読み取り専用MCPのような安定した接点へ投影します。
 

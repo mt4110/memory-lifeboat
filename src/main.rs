@@ -88,6 +88,10 @@ fn import_source(store: &Store, source: ImportSource) -> Result<()> {
             store.write_manifest(&manifest)?;
             store.append_records(summary.into_records(&manifest.id)?)?;
             println!("imported ChatGPT export manifest {}", manifest.id);
+            println!(
+                "wrote {}",
+                report::write_run_log(store, &manifest)?.display()
+            );
         }
         ImportSource::AtlasMemoryText { path } => {
             let text = read_text_or_stdin(path.as_ref())?;
@@ -104,6 +108,10 @@ fn import_source(store: &Store, source: ImportSource) -> Result<()> {
             store.write_manifest(&manifest)?;
             store.append_records(types::records_from_atlas_text(&text, &manifest.id)?)?;
             println!("imported Atlas memory text manifest {}", manifest.id);
+            println!(
+                "wrote {}",
+                report::write_run_log(store, &manifest)?.display()
+            );
         }
         ImportSource::Bookmarks { html } => {
             let source_sha256 = store.encrypt_blob(&html)?;
@@ -120,6 +128,10 @@ fn import_source(store: &Store, source: ImportSource) -> Result<()> {
             store.write_manifest(&manifest)?;
             store.append_records(types::records_from_bookmarks(items, &manifest.id)?)?;
             println!("imported bookmarks manifest {}", manifest.id);
+            println!(
+                "wrote {}",
+                report::write_run_log(store, &manifest)?.display()
+            );
         }
         ImportSource::Urls { path } => {
             let text = fs::read_to_string(&path)
@@ -132,6 +144,10 @@ fn import_source(store: &Store, source: ImportSource) -> Result<()> {
             store.write_manifest(&manifest)?;
             store.append_records(types::records_from_urls(urls, &manifest.id)?)?;
             println!("imported URL list manifest {}", manifest.id);
+            println!(
+                "wrote {}",
+                report::write_run_log(store, &manifest)?.display()
+            );
         }
     }
 

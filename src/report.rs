@@ -1,9 +1,61 @@
 use std::fs;
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::path::PathBuf;
 
 use anyhow::Result;
 
-use crate::store::Store;
+use crate::{store::Store, types::SourceManifest};
+
+pub fn write_run_log(store: &Store, manifest: &SourceManifest) -> Result<PathBuf> {
+    store.ensure_layout()?;
+    let runs_dir = store.audit_dir().join("runs");
+    fs::create_dir_all(&runs_dir)?;
+    let path = runs_dir.join(format!("{}.md", manifest.id));
+
+    let mut body = String::new();
+    body.push_str("# Memory Lifeboat Run Log\n\n");
+    body.push_str("## Result\n\n");
+    body.push_str("- Status: `completed`\n");
+    body.push_str(&format!("- Completed at: `{}`\n", manifest.completed_at));
+    body.push_str(&format!("- Source: `{:?}`\n", manifest.source));
+    body.push_str(&format!(
+        "- Capture method: `{}`\n",
+        manifest.capture_method
+    ));
+    body.push_str(&format!("- Observed items: {}\n", manifest.observed_items));
+    body.push_str(&format!("- Coverage: `{:?}`\n", manifest.coverage));
+    if let Some(sha256) = &manifest.evidence_sha256 {
+        body.push_str(&format!("- Evidence SHA-256: `{sha256}`\n"));
+    }
+    body.push_str("\n## Safety Checks\n\n");
+    body.push_str("- No network transfer was performed.\n");
+    body.push_str(
+        "- No cookies, Keychain browser secrets, or internal browser databases were read.\n",
+    );
+    body.push_str("- Candidate data was not written to native Codex memory.\n");
+    body.push_str("- This log intentionally excludes source paths and imported content.\n");
+
+    fs::write(&path, body)?;
+    append_event(store, manifest)?;
+    Ok(path)
+}
+
+fn append_event(store: &Store, manifest: &SourceManifest) -> Result<()> {
+    let path = store.audit_dir().join("events.log");
+    let mut file = OpenOptions::new().create(true).append(true).open(path)?;
+    writeln!(
+        file,
+        "time={} status=completed source={:?} observed_items={} coverage={:?} manifest={}",
+        manifest.completed_at,
+        manifest.source,
+        manifest.observed_items,
+        manifest.coverage,
+        manifest.id
+    )?;
+    file.sync_data()?;
+    Ok(())
+}
 
 pub fn write_report(store: &Store) -> Result<PathBuf> {
     store.ensure_layout()?;
@@ -19,6 +71,7 @@ pub fn write_report(store: &Store) -> Result<PathBuf> {
     body.push_str("## Summary\n\n");
     body.push_str(&format!("- Manifests: {}\n", manifests.len()));
     body.push_str(&format!("- Candidate records: {}\n\n", records.len()));
+    body.push_str(&format!("- Run logs: {}\n\n", run_log_count(store)?));
     body.push_str("## Sources\n\n");
     for manifest in &manifests {
         body.push_str(&format!(
@@ -39,4 +92,12 @@ pub fn write_report(store: &Store) -> Result<PathBuf> {
 
     fs::write(&path, body)?;
     Ok(path)
+}
+
+fn run_log_count(store: &Store) -> Result<usize> {
+    let runs_dir = store.audit_dir().join("runs");
+    if !runs_dir.exists() {
+        return Ok(0);
+    }
+    Ok(fs::read_dir(runs_dir)?.count())
 }

@@ -22,7 +22,13 @@ cargo run -- import urls ~/Downloads/urls.txt
 cargo run -- report
 ```
 
-各取り込みの直後に `audit/latest-report.md` が更新されます。まずはそのレポートで、どのソースを何件読み取ったかを確認してください。
+各取り込みの直後に `audit/latest-report.md` が更新されます。さらに `audit/runs/` に、取り込み単位の実行ログがMarkdownで蓄積されます。ログには時刻、ソース種別、件数、カバレッジ、安全確認を記録しますが、本文・URL・元ファイルの場所は書きません。
+
+別タブでは次のコマンドで進行状況を追えます。`Ctrl-C` は監視を止めるだけで、救出データには影響しません。
+
+```bash
+./scripts/watch-audit.sh
+```
 
 ## 今は移さないもの
 
